@@ -12,6 +12,17 @@
 		text-align: center;
 	}
 
+	.main-card {
+		text-align: center;
+		font-size: 36px;
+		font-weight: 800;
+		min-height: 500px;
+	}
+
+	.loading {
+		line-height: 300px;
+	}
+
 	.main-card button {
 		position: relative;
 		left: -45px;
@@ -53,8 +64,6 @@
 			const response = await fetch(`${OPEN_CAT_DOMAIN}/cat/says/${text}?json=true`);
 			const responseJson = await response.json();
 			const imageUrl = await responseJson.url;
-
-			console.log(imageUrl);
 			return `${OPEN_CAT_DOMAIN}/${imageUrl}`;
 		}
 
@@ -65,10 +74,17 @@
 			</li>
 		);
 
-		const MainCard = ({ img, onHeartClick }) => {
-
-			return (
-				<div className="main-card">
+		const MainCard = ({ img, onHeartClick, isFavorite, loading }) => {
+			const EMPTY_HEART = "🤍";
+			const FULL_HEART = "💖";
+			const heartIcon = isFavorite ? FULL_HEART : EMPTY_HEART
+			const noCat = (
+				<div className="loading">
+					loading
+				</div>
+			)
+			const viewCat = (
+				<div>
 					<img
 						src={img}
 						alt="cat"
@@ -77,8 +93,14 @@
 					<button
 						onClick={onHeartClick}
 					>
-						💛
+						{heartIcon}
 					</button>
+				</div>
+			)
+
+			return (
+				<div className="main-card">
+					{loading ? noCat : viewCat}
 				</div>
 			)
 		}
@@ -165,13 +187,38 @@
 			const [mainCat, setMainCat] = React.useState(CAT1);
 			const [favorites, setFavorites] = React.useState(jsonLocalStorage.getItem('favorites') || []);
 
+			const isFavorite = favorites.includes(mainCat);
+			const [loading, setLoading] = React.useState(true);
+
 			async function updateMainCat(value) {
+				setLoading(true);
 				const newCat = await fetchCat(value);
+
 				setMainCat(newCat);
+
 				const nextCounter = counter + 1;
-				setCounter(nextCounter);
 				jsonLocalStorage.setItem('counter', nextCounter);
+				setCounter((nextCounter));
+
+				setLoading(false);
 			}
+
+			async function initCat() {
+				const newCat = await fetchCat("First Cat");
+				console.log("init", newCat);
+				setMainCat(newCat);
+				setLoading(false);
+			}
+
+			// initCat(); // this runs at every render update
+
+			React.useEffect(() => {
+				initCat();
+			}, []);
+
+			// React.useEffect(() => {
+			// 	console.log("state changes")
+			// }, [favorites]);
 
 			function handleHeartClick() {
 				// 버튼 누르면 고양이 추가
@@ -180,11 +227,13 @@
 				jsonLocalStorage.setItem('favorites', nextFavorites)
 			}
 
+			const partialTitle = counter ? `${counter}번째 ` : ''
+
 			return (
 				<div>
-					<Title>{counter}번째 고양이 가라사대 가라사대</Title>
+					<Title>{partialTitle}고양이 가라사대</Title>
 					<CatForm updateMainCat={updateMainCat} />
-					<MainCard img={mainCat} onHeartClick={handleHeartClick} />
+					<MainCard img={mainCat} onHeartClick={handleHeartClick} isFavorite={isFavorite} loading={loading} />
 					<Favorites favorites={favorites} />
 				</div>
 			);
