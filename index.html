@@ -164,11 +164,13 @@
 
 		function Favorites({ favorites }) {
 
+			const isEmpty = favorites.length ? false : true;
+			const showFavorites = favorites.map(cat => <CatItem img={cat} key={cat} />)
+			const showGuideline = "하트를 눌러 마음에 드는 고양이 사진을 저장하세요. Click Heart button to save your favorite cats";
+
 			return (
 				<ul className="favorites">
-					{
-						favorites.map(cat => <CatItem img={cat} key={cat} />)
-					}
+					{isEmpty ? showGuideline : showFavorites}
 				</ul>
 			)
 		}
@@ -183,9 +185,15 @@
 			// const setCounter = counterState[1];
 
 			// wrap localStorage.getItem with Number if string error occurs
-			const [counter, setCounter] = React.useState(jsonLocalStorage.getItem('counter') || 0);
+			const [counter, setCounter] = React.useState(
+				() => {
+					return jsonLocalStorage.getItem('counter') || 0;
+				});
 			const [mainCat, setMainCat] = React.useState(CAT1);
-			const [favorites, setFavorites] = React.useState(jsonLocalStorage.getItem('favorites') || []);
+			const [favorites, setFavorites] = React.useState(
+				() => {
+					return jsonLocalStorage.getItem('favorites') || []
+				});
 
 			const isFavorite = favorites.includes(mainCat);
 			const [loading, setLoading] = React.useState(true);
@@ -196,9 +204,11 @@
 
 				setMainCat(newCat);
 
-				const nextCounter = counter + 1;
-				jsonLocalStorage.setItem('counter', nextCounter);
-				setCounter((nextCounter));
+				setCounter((prev) => {
+					const nextCounter = prev + 1;
+					jsonLocalStorage.setItem('counter', nextCounter);
+					return nextCounter;
+				});
 
 				setLoading(false);
 			}
