@@ -1,3 +1,11 @@
+## Deploy CRA version to Github Pages
+
+1. `npm run build`
+2. `npm install gh-pages`
+3. add `package.json` commands: ` "deploy": "gh-pages -d build" `
+4. add "homepage" url (your github page full url) in `package.json`
+5. your `/build` files will upload to `gh-pages` branch. In github, change to source `branch: gh-pages` in Github Pages menu.
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
